@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 10 Hospitals in Mumbai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a5f7a;
+            --secondary-color: #86c6e3;
+            --accent-color: #e8f4f8;
+            --text-color: #2c3e50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            color: var(--text-color);
+        }
+
+        .header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .city-selector {
+            background: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .city-selector select {
+            width: 300px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: 2px solid var(--primary-color);
+            border-radius: 25px;
+            background-color: white;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+
+        .city-selector select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(134, 198, 227, 0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hospital-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .hospital-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .hospital-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .hospital-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .hospital-info {
+            padding: 1.5rem;
+        }
+
+        .hospital-name {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .specialties {
+            margin: 1rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .specialty-tag {
+            background: var(--accent-color);
+            color: var(--primary-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .contact-info {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .rating {
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 2rem;
+            grid-column: 1 / -1;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            grid-column: 1 / -1;
+            background: var(--accent-color);
+            border-radius: 10px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .hospital-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body></body>
+    <header class="header">
+        <h1>Top 10 Hospitals in Mumbai</h1>
+        <p>Leading Healthcare Institutions Providing Excellence in Medical Care</p>
+    </header>
+
+    <div class="city-selector">
+        <select id="citySelect" onchange="changeCity()">
+            <optgroup label="Metro Cities">
+                <option value="mumbai">Mumbai</option>
+                <option value="delhi">Delhi</option>
+                <option value="bangalore">Bangalore</option>
+                <option value="chennai">Chennai</option>
+                <option value="kolkata">Kolkata</option>
+            </optgroup>
+            <optgroup label="North India">
+                <option value="chandigarh">Chandigarh</option>
+                <option value="jaipur">Jaipur</option>
+                <option value="lucknow">Lucknow</option>
+                <option value="dehradun">Dehradun</option>
+                <option value="amritsar">Amritsar</option>
+            </optgroup>
+            <optgroup label="South India">
+                <option value="hyderabad">Hyderabad</option>
+                <option value="kochi">Kochi</option>
+                <option value="coimbatore">Coimbatore</option>
+                <option value="mysore">Mysore</option>
+                <option value="mangalore">Mangalore</option>
+            </optgroup>
+            <optgroup label="West India">
+                <option value="pune">Pune</option>
+                <option value="ahmedabad">Ahmedabad</option>
+                <option value="surat">Surat</option>
+                <option value="nagpur">Nagpur</option>
+                <option value="vadodara">Vadodara</option>
+            </optgroup>
+            <optgroup label="East India">
+                <option value="bhubaneswar">Bhubaneswar</option>
+                <option value="patna">Patna</option>
+                <option value="guwahati">Guwahati</option>
+                <option value="ranchi">Ranchi</option>
+                <option value="siliguri">Siliguri</option>
+            </optgroup>
+        </select>
+    </div>
+
+    <div class="container">
+        <div class="hospital-grid" id="hospitalGrid">
+            <!-- Hospital cards will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        const hospitalDatabase = {
+    mumbai: [
+        {
+            name: "Lilavati Hospital",
+            image: "https://content3.jdmagicbox.com/v2/comp/mumbai/g1/022pxx22.xx22.000183058072.h0g1/catalogue/lilavati-hospital-and-research-centre-bandra-reclamation-bandra-west-mumbai-dermatologists-pfmzzytexa.jpg",
+            rating: 5,
+            specialties: ["Cardiology", "Neurology", "Oncology"],
+            description: "Multi-specialty tertiary care hospital known for advanced medical treatments.",
+            location: "Bandra West, Mumbai",
+            phone: "022-2675 1000"
+        },
+        {
+            name: "Breach Candy Hospital",
+            image: "https://content3.jdmagicbox.com/v2/comp/mumbai/u1/022pxx22.xx22.000783548548.j9u1/catalogue/breach-candy-hospital-breach-candy-mumbai-pathology-labs-32lcm.jpg",
+            rating: 5,
+            specialties: ["Surgery", "Internal Medicine", "Pediatrics"],
+            description: "Premier healthcare institution with state-of-the-art facilities.",
+            location: "Breach Candy, Mumbai",
+            phone: "022-2366 7777"
+        },
+        {
+            name: "Kokilaben Dhirubhai Ambani Hospital",
+            image: "https://safartibbi.com/wp-content/uploads/2022/11/kokilaben-4.jpg",
+            rating: 5,
+            specialties: ["Robotic Surgery", "Cardiac Care", "Neuroscience"],
+            description: "Ultra-modern hospital with international standards of healthcare.",
+            location: "Andheri West, Mumbai",
+            phone: "022-4269 6969"
+        }
+    ],
+    delhi: [
+        {
+            name: "AIIMS Delhi",
+            image: "https://nsventures.in/wp-content/uploads/2022/08/AIIMS.jpg",
+            rating: 5,
+            specialties: ["Multi-Specialty", "Research", "Emergency Care"],
+            description: "India's premier medical research and treatment facility.",
+            location: "Ansari Nagar, New Delhi",
+            phone: "011-2658 8500"
+        },
+        {
+            name: "Fortis Escorts Heart Institute",
+            image: "https://safartibbi.com/wp-content/uploads/2022/11/fortis-1.jpg",
+            rating: 5,
+            specialties: ["Cardiology", "Cardiac Surgery", "Vascular Medicine"],
+            description: "Specialized cardiac care center with world-class facilities.",
+            location: "Okhla Road, New Delhi",
+            phone: "011-4713 5000"
+        }
+    ],
+    bangalore: [
+        {
+            name: "Manipal Hospital",
+            image: "https://marlinmedicalassistance.com/_next/image/?url=https%3A%2F%2Fdashboard.marlinmedicalassistance.com%2Fstorage%2Fbannerimages%2F%2FVmJrama5RuC2UkdwRtPMgn7DStLjdCvzR2JKGBzr.jpg&w=3840&q=75",
+            rating: 5,
+            specialties: ["Oncology", "Neuroscience", "Cardiac Sciences"],
+            description: "Leading healthcare provider with cutting-edge technology.",
+            location: "HAL Airport Road, Bangalore",
+            phone: "080-2502 4444"
+        },
+        {
+            name: "Narayana Health City",
+            image: "https://www.tour2india4health.com/narayanahealth-banglore-india/images/narayana-health-banner.jpg",
+            rating: 5,
+            specialties: ["Cardiac Care", "Orthopedics", "Transplants"],
+            description: "World-renowned for affordable and quality healthcare.",
+            location: "Bommasandra, Bangalore",
+            phone: "080-7122 2222"
+        }
+    ],
+    chennai: [
+        {
+            name: "Apollo Hospitals",
+            image: "https://safartibbi.com/wp-content/uploads/2023/08/Apollo-Hospital-1.jpg",
+            rating: 5,
+            specialties: ["Cardiology", "Oncology", "Transplants"],
+            description: "Pioneer in private healthcare with comprehensive medical facilities.",
+            location: "Greams Road, Chennai",
+            phone: "044-2829 3333"
+        },
+        {
+            name: "Fortis Malar Hospital",
+            image: "https://marlinmedicalassistance.com/_next/image/?url=https%3A%2F%2Fdashboard.marlinmedicalassistance.com%2Fstorage%2Fbannerimages%2F%2F8sGnczcOVW2EKNFFpjiNwJucpWlaC5FHGyOe9JQP.jpg&w=3840&q=75",
+            rating: 4,
+            specialties: ["Cardiac Care", "Emergency Services", "Pediatrics"],
+            description: "Specialized in cardiac care and multi-specialty treatments.",
+            location: "Adyar, Chennai",
+            phone: "044-4289 2222"
+        }
+    ],
+    kolkata: [
+        {
+            name: "AMRI Hospitals",
+            image: "https://www.beryllgroup.com/img/projects/AMRI-Hospital-Kolkata/AMRI-Hospital.jpeg",
+            rating: 5,
+            specialties: ["Neurosciences", "Cardiac Care", "Orthopedics"],
+            description: "Leading healthcare provider in Eastern India.",
+            location: "Dhakuria, Kolkata",
+            phone: "033-6626 4444"
+        },
+        {
+            name: "Fortis Hospital",
+            image: "https://i.ytimg.com/vi/sX2--Cx4Jb0/maxresdefault.jpg",
+            rating: 4,
+            specialties: ["Cardiology", "Oncology", "Neurosurgery"],
+            description: "Multi-specialty hospital with advanced medical facilities.",
+            location: "Anandapur, Kolkata",
+            phone: "033-6628 5000"
+        }
+    ],
+    pune: [
+        {
+            name: "Ruby Hall Clinic",
+            image: "https://images.hindustantimes.com/img/2022/05/19/550x309/9c505512-d79a-11ec-ace9-5ee6ff21344d_1652985706812.jpg",
+            rating: 5,
+            specialties: ["Cardiology", "Neurology", "Transplants"],
+            description: "One of the oldest and most trusted healthcare institutions.",
+            location: "Sassoon Road, Pune",
+            phone: "020-6645 5555"
+        },
+        {
+            name: "Jehangir Hospital",
+            image: "https://content.jdmagicbox.com/v2/comp/kanpur/w4/0512px512.x512.231230221927.s9w4/catalogue/jehangir-hospital-kasimganj-kanpur-hospitals-GrnX9XHck1.jpg",
+            rating: 4,
+            specialties: ["Internal Medicine", "Surgery", "Critical Care"],
+            description: "Premier healthcare facility with comprehensive medical services.",
+            location: "Sassoon Road, Pune",
+            phone: "020-6681 1111"
+        }
+    ],
+    hyderabad: [
+        {
+            name: "Care Hospitals",
+            image: "https://www.carehospitals.com/assets/images/main/muusheerabad.png",
+            rating: 5,
+            specialties: ["Cardiac Sciences", "Neurosciences", "Orthopedics"],
+            description: "Leading multi-specialty healthcare provider.",
+            location: "Banjara Hills, Hyderabad",
+            phone: "040-6165 6565"
+        },
+        {
+            name: "Apollo Hospitals",
+            image: "https://cdn.apollohospitals.com/hyderabad/2024/03/Apollo-Hospitals-image-1.jpg",
+            rating: 5,
+            specialties: ["Oncology", "Transplants", "Robotic Surgery"],
+            description: "State-of-the-art medical facility with advanced treatments.",
+            location: "Jubilee Hills, Hyderabad",
+            phone: "040-2360 7777"
+        }
+    ],
+    ahmedabad: [
+        {
+            name: "Sterling Hospital",
+            image: "https://content.jdmagicbox.com/comp/ahmedabad/71/079pf012571/catalogue/sterling-hospital-memnagar-ahmedabad-ent-doctors-naznnlmz4i.jpg",
+            rating: 4,
+            specialties: ["Cardiology", "Neurology", "Gastroenterology"],
+            description: "Advanced healthcare facility with modern infrastructure.",
+            location: "Gurukul Road, Ahmedabad",
+            phone: "079-4001 1111"
+        },
+        {
+            name: "Zydus Hospitals",
+            image: "https://zydushospitals.com/images/best-hospital-in-vadodara-gujarat-india-zydus-hospitals.webp",
+            rating: 5,
+            specialties: ["Cardiac Care", "Critical Care", "Orthopedics"],
+            description: "Modern hospital with patient-centric approach.",
+            location: "SG Highway, Ahmedabad",
+            phone: "079-7123 4567"
+        }
+    ],
+    chandigarh: [
+        {
+            name: "Post Graduate Institute (PGI)",
+            image: "https://images.shiksha.com/mediadata/images/1563339611phpaiq7Bk.jpeg",
+            rating: 5,
+            specialties: ["Research", "Multi-Specialty", "Advanced Care"],
+            description: "Premier medical research and treatment institute.",
+            location: "Sector 12, Chandigarh",
+            phone: "0172-2747 585"
+        },
+        {
+            name: "Fortis Hospital",
+            image: "https://images1-fabric.practo.com/fortis-hospital-mohali-1470392492-57a468ac0ff3e.jpg",
+            rating: 4,
+            specialties: ["Cardiac Care", "Orthopedics", "Neurosciences"],
+            description: "Multi-specialty hospital with modern facilities.",
+            location: "Mohali, Chandigarh",
+            phone: "0172-4692 222"
+        }
+    ],
+    lucknow: [
+        {
+            name: "Medanta Hospital",
+            image: "https://d1ea147o02h74h.cloudfront.net/hospitals/medanta_lucknow_1-min.jpg",
+            rating: 5,
+            specialties: ["Cardiology", "Neurosciences", "Cancer Care"],
+            description: "Super-specialty hospital with advanced medical care.",
+            location: "Gomti Nagar, Lucknow",
+            phone: "0522-4505 050"
+        },
+        {
+            name: "SGPGI",
+            image: "https://mediniz-images-2018-100.s3.ap-south-1.amazonaws.com/post-images/sgpgi-hospital-lucknow_1611750610.jpg",
+            rating: 5,
+            specialties: ["Research", "Multi-Specialty", "Advanced Treatment"],
+            description: "Leading medical research and treatment facility.",
+            location: "Raebareli Road, Lucknow",
+            phone: "0522-2494 444"
+        }
+    ],
+    jaipur: [
+        {
+            name: "Fortis Escorts Hospital",
+            image: "https://content.jdmagicbox.com/v2/comp/delhi/96/011p61696/catalogue/fortis-hospital-faridabad-faridabad-nit-faridabad-hospitals-2k046bs.jpg",
+            rating: 4,
+            specialties: ["Cardiac Care", "Orthopedics", "Neurology"],
+            description: "Leading multi-specialty hospital in Rajasthan.",
+            location: "JLN Marg, Jaipur",
+            phone: "0141-4547 777"
+        },
+        {
+            name: "Narayana Multispeciality Hospital",
+            image: "https://www.easytoken.in/uploads/378a19776fb754a329f7b9c8509a543c.jpg",
+            rating: 4,
+            specialties: ["Cardiac Sciences", "Orthopedics", "General Surgery"],
+            description: "Advanced healthcare facility with affordable care.",
+            location: "Malviya Nagar, Jaipur",
+            phone: "0141-4133 333"
+        }
+    ],
+    dehradun: [
+        {
+            name: "Max Super Specialty Hospital",
+            image: "https://cdn.hexahealth.com/Image/b11311ec-6386-4216-bc92-8097190b12fd.webp",
+            rating: 4,
+            specialties: ["Cardiology", "Orthopedics", "Neurology"],
+            description: "Leading multi-specialty hospital in Dehradun with advanced medical care.",
+            location: "Malsi, Dehradun",
+            phone: "0135-6660000"
+        },
+        {
+            name: "Synergy Hospital",
+            image: "https://content.jdmagicbox.com/comp/dehradun/h7/9999px135.x135.160312124501.q8h7/catalogue/dr-praveen-kumar-mttal-synergy-hospital-ballupur-dehradun-orthopaedic-doctors-498vl2xtr8.jpg",
+            rating: 4,
+            specialties: ["General Surgery", "Internal Medicine", "Emergency Care"],
+            description: "Modern healthcare facility providing quality medical services.",
+            location: "GMS Road, Dehradun",
+            phone: "0135-2720720"
+        }
+    ],
+    
+    amritsar: [
+        {
+            name: "Fortis Escorts Hospital",
+            image: "https://hospitalsindia.online/wp-content/uploads/2021/06/Fortis-Escorts-Hospital-Amritsar-scaled.jpg",
+            rating: 4,
+            specialties: ["Cardiac Care", "Neurosciences", "Orthopedics"],
+            description: "Premier healthcare institution in Amritsar with modern facilities.",
+            location: "Court Road, Amritsar",
+            phone: "0183-5045555"
+        },
+        {
+            name: "Amandeep Hospital",
+            image: "https://content.jdmagicbox.com/comp/amritsar/x6/0183px183.x183.180710143639.q4x6/catalogue/amandeep-medicity-hospital-amritsar-gpo-amritsar-hospitals-0zcjf2anlz.jpg",
+            rating: 4,
+            specialties: ["Trauma Care", "Joint Replacement", "Spine Surgery"],
+            description: "Leading trauma and orthopedic care center in the region.",
+            location: "Model Town, Amritsar",
+            phone: "0183-2234544"
+        }
+    ],
+
+    kochi: [
+        {
+            name: "Aster Medcity",
+            image: "https://www.asterhospitals.in/sites/default/files/2022-05/best-hospital-in-kochi-kerala.jpg",
+            rating: 5,
+            specialties: ["Cardiology", "Neuroscience", "Oncology"],
+            description: "World-class healthcare destination with advanced medical technology.",
+            location: "Cheranalloor, Kochi",
+            phone: "0484-6699999"
+        },
+        {
+            name: "Lakeshore Hospital",
+            image: "https://www.vpslakeshorehospital.com/uploads/album/hospital-ZFoUcYQ44yuGyhq.jpg",
+            rating: 4,
+            specialties: ["Transplant Surgery", "Cardiac Sciences", "Neurology"],
+            description: "Leading super-specialty hospital known for organ transplants.",
+            location: "Nettoor, Kochi",
+            phone: "0484-2701032"
+        }
+    ],
+
+    coimbatore: [
+        {
+            name: "PSG Hospitals",
+            image: "https://www.psghospitals.com/wp-content/uploads/2022/03/banner2.jpg",
+            rating: 4,
+            specialties: ["Multi-Specialty", "Research", "Emergency Care"],
+            description: "Leading teaching hospital with comprehensive medical facilities.",
+            location: "Peelamedu, Coimbatore",
+            phone: "0422-4345555"
+        },
+        {
+            name: "KG Hospital",
+            image: "https://helptravelindia.com/wp-content/uploads/2024/07/KG-Hospital-Coimbatore-Tamil-Nadu.jpg",
+            rating: 4,
+            specialties: ["Cardiology", "Neurology", "Oncology"],
+            description: "Multi-specialty hospital providing advanced healthcare services.",
+            location: "Arts College Road, Coimbatore",
+            phone: "0422-2210000"
+        }
+    ],
+
+    mysore: [
+        {
+            name: "Apollo BGS Hospitals",
+            image: "https://www.apollohospitals.com/mysore/wp-content/uploads/2016/01/Apollo_Hospitals_1.jpg",
+            rating: 4,
+            specialties: ["Cardiac Sciences", "Neurosciences", "Orthopedics"],
+            description: "Leading healthcare provider in Mysore with advanced medical care.",
+            location: "Kuvempunagar, Mysore",
+            phone: "0821-2568888"
+        },
+        {
+            name: "Columbia Asia Hospital",
+            image: "https://starofmysore.com/wp-content/uploads/2020/10/news-7-columbia-asia-hospital.jpg",
+            rating: 4,
+            specialties: ["General Surgery", "Internal Medicine", "Pediatrics"],
+            description: "Modern hospital with international healthcare standards.",
+            location: "Mysore-Bangalore Road, Mysore",
+            phone: "0821-3907777"
+        }
+    ],
+
+    mangalore: [
+        {
+            name: "KMC Hospital",
+            image: "https://images1-fabric.practo.com/kmc-hospital-mangalore-1484032889-58748b794c353.jpg",
+            rating: 4,
+            specialties: ["Multi-Specialty", "Research", "Emergency Care"],
+            description: "Premier teaching hospital with advanced medical facilities.",
+            location: "Attavar, Mangalore",
+            phone: "0824-2445858"
+        },
+        {
+            name: "AJ Hospital",
+            image: "https://s3.ap-south-1.amazonaws.com/media.production.in/hospitals/images/1669179682867.jpg",
+            rating: 4,
+            specialties: ["Cardiology", "Neurology", "Critical Care"],
+            description: "Modern multi-specialty hospital with comprehensive care.",
+            location: "Kuntikana, Mangalore",
+            phone: "0824-2225533"
+        }
+    ],
+
+    surat: [
+        {
+            name: "BAPS Hospital",
+            image: "https://www.baps.org/Data/Sites/1/Media/GalleryImages/1555/WebImages/surat02f.jpg",
+            rating: 4,
+            specialties: ["Cardiology", "Neurology", "Oncology"],
+            description: "Modern healthcare facility with advanced medical services.",
+            location: "Adajan, Surat",
+            phone: "0261-2780111"
+        },
+        {
+            name: "Kiran Multi Super Specialty Hospital",
+            image: "https://content.jdmagicbox.com/comp/surat/k5/0261px261.x261.170203114543.w2k5/catalogue/kiran-multi-super-speciality-hospital-and-research-center-katargam-surat-hospitals-oqbiwl3euw.jpg?fit=around%7C350:350&crop=350:350;*,*",
+            rating: 4,
+            specialties: ["Cardiac Care", "Neurosciences", "Orthopedics"],
+            description: "Leading multi-specialty hospital in South Gujarat.",
+            location: "Sumul Dairy Road, Surat",
+            phone: "0261-2353881"
+        }
+    ],
+
+    nagpur: [
+        {
+            name: "Wockhardt Hospital",
+            image: "https://sys.mediflam.com/OfflineUploads/HospitalImage/Wockhardt_hospital_Nagpur_Super_Speciality_2.JPG",
+            rating: 4,
+            specialties: ["Cardiac Care", "Orthopedics", "Neurosciences"],
+            description: "Advanced healthcare facility with modern medical technology.",
+            location: "North Ambazari Road, Nagpur",
+            phone: "0712-6624444"
+        },
+        {
+            name: "Orange City Hospital",
+            image: "https://im.hunt.in/cg/nagpur/City-Guide/orange-city.jpg",
+            rating: 4,
+            specialties: ["Cardiology", "Neurology", "Critical Care"],
+            description: "Leading multi-specialty hospital in Central India.",
+            location: "Rahate Colony, Nagpur",
+            phone: "0712-2747777"
+        }
+    ],
+
+    vadodara: [
+        {
+            name: "Sterling Hospital",
+            image: "https://images1-fabric.practo.com/practices/732048/sterling-hospital-vadodara-5bc6d6e794649.jpg",
+            rating: 4,
+            specialties: ["Cardiology", "Neurology", "Oncology"],
+            description: "Premier healthcare provider with comprehensive medical services.",
+            location: "Race Course Circle, Vadodara",
+            phone: "0265-2353535"
+        },
+        {
+            name: "Bhailal Amin General Hospital",
+            image: "https://ik.imagekit.io/mqlrbidwu/SysTrack/images/about/about11.JPG",
+            rating: 4,
+            specialties: ["General Surgery", "Internal Medicine", "Emergency Care"],
+            description: "Trusted healthcare institution serving the community.",
+            location: "Gorwa Road, Vadodara",
+            phone: "0265-2280201"
+        }
+    ],
+
+    bhubaneswar: [
+        {
+            name: "AMRI Hospital",
+            image: "https://www.nirujahealthtech.com/wp-content/uploads/2020/10/Amri-Hospital-Bhubaneswar.jpg",
+            rating: 4,
+            specialties: ["Cardiology", "Neurosciences", "Orthopedics"],
+            description: "Leading healthcare provider in Eastern India.",
+            location: "Chandrasekharpur, Bhubaneswar",
+            phone: "0674-6666666"
+        },
+        {
+            name: "Apollo Hospital",
+            image: "https://content3.jdmagicbox.com/comp/bhubaneshwar/q6/0674px674.x674.100930143533.k1q6/catalogue/apollo-hospitals-sainik-school-bhubaneshwar-hospitals-ztdvkfg4va.jpg",
+            rating: 4,
+            specialties: ["Cardiac Care", "Oncology", "Emergency Services"],
+            description: "Multi-specialty hospital with advanced medical facilities.",
+            location: "Sainik School Road, Bhubaneswar",
+            phone: "0674-2300007"
+        }
+    ],
+
+    patna: [
+        {
+            name: "Paras HMRI Hospital",
+            image: "https://api.parashospitals.com/storage/hospitals/June2024/uG4A4bhOc7MtfnVwDyTP.jpg",
+            rating: 4,
+            specialties: ["Cardiology", "Neurology", "Oncology"],
+            description: "Advanced multi-specialty hospital in Bihar.",
+            location: "Raja Bazar, Patna",
+            phone: "0612-7107777"
+        },
+        {
+            name: "Medanta Hospital",
+            image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Jay_Prabha_Medanta.tif/lossy-page1-1200px-Jay_Prabha_Medanta.tif.jpg",
+            rating: 4,
+            specialties: ["Cardiac Sciences", "Neurosciences", "Critical Care"],
+            description: "Super-specialty hospital with modern healthcare facilities.",
+            location: "Kankarbagh, Patna",
+            phone: "0612-2200000"
+        }
+    ],
+
+    guwahati: [
+        {
+            name: "GNRC Hospitals",
+            image: "https://mediniz-images-2018-100.s3.ap-south-1.amazonaws.com/web-resources/hospital.jpg",
+            rating: 4,
+            specialties: ["Neurology", "Cardiology", "Emergency Care"],
+            description: "Leading healthcare provider in Northeast India.",
+            location: "Dispur, Guwahati",
+            phone: "0361-2461473"
+        },
+        {
+            name: "Nemcare Hospital",
+            image: "https://www.ameyadesign.com/wp-content/uploads/2018/10/cate_heal_com_nemcare_guwahati-1.jpg",
+            rating: 4,
+            specialties: ["General Surgery", "Obstetrics", "Critical Care"],
+            description: "Trusted multi-specialty hospital in Assam.",
+            location: "Bhangagarh, Guwahati",
+            phone: "0361-2529457"
+        }
+    ],
+
+    ranchi: [
+        {
+            name: "Medica Hospital",
+            image: "https://medicaranchi.in/wp-content/uploads/2022/06/medica-kolkata.jpg",
+            rating: 4,
+            specialties: ["Cardiology", "Neurosciences", "Orthopedics"],
+            description: "Advanced healthcare facility in Jharkhand.",
+            location: "Bariatu, Ranchi",
+            phone: "0651-6999999"
+        },
+        {
+            name: "Orchid Medical Centre",
+            image: "https://www.orchidmedcentre.com/admin/patient_testimonial/testimonial/image/65f29a8352d54_orchid%20building.webp",
+            rating: 4,
+            specialties: ["General Medicine", "Surgery", "Emergency Care"],
+            description: "Modern multi-specialty hospital with quality healthcare.",
+            location: "Kanke Road, Ranchi",
+            phone: "0651-2230333"
+        }
+    ],
+
+    siliguri: [
+        {
+            name: "Neotia Getwel Healthcare Centre",
+            image: "https://content.jdmagicbox.com/comp/siliguri/v4/9999px353.x353.130506123314.m3v4/catalogue/neotia-getwel-healthcare-centre-matigara-siliguri-private-hospitals-gs9cgze.jpg",
+            rating: 4,
+            specialties: ["Cardiology", "Neurology", "Critical Care"],
+            description: "Leading healthcare provider in North Bengal.",
+            location: "Uttorayan, Siliguri",
+            phone: "0353-6605555"
+        },
+        {
+            name: "North Bengal Neuro Centre",
+            image: "https://foujiadda.in/admin/uploads//echs/image_1653408880.jpeg",
+            rating: 4,
+            specialties: ["Neurosciences", "Spine Surgery", "Emergency Care"],
+            description: "Specialized center for neurological treatments.",
+            location: "Sevoke Road, Siliguri",
+            phone: "0353-2545478"
+        }
+    ]
+
+};
+
+        function changeCity() {
+            const citySelect = document.getElementById('citySelect');
+            const selectedCity = citySelect.value;
+            const cityName = citySelect.options[citySelect.selectedIndex].text;
+            
+            // Update header title
+            document.querySelector('.header h1').textContent = `Top 10 Hospitals in ${cityName}`;
+            
+            // Get the hospital grid container
+            const hospitalGrid = document.getElementById('hospitalGrid');
+            
+            // Show loading state
+            hospitalGrid.innerHTML = '<div class="loading-spinner">Loading hospitals...</div>';
+            
+            // Simulate loading delay (remove in production)
+            setTimeout(() => {
+                const hospitals = hospitalDatabase[selectedCity] || [];
+                
+                if (hospitals.length === 0) {
+                    hospitalGrid.innerHTML = `
+                        <div class="no-results">
+                            <p>No hospital data available for ${cityName} yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Clear and populate the grid
+                hospitalGrid.innerHTML = '';
+                hospitals.forEach(hospital => {
+                    const hospitalCard = createHospitalCard(hospital);
+                    hospitalGrid.appendChild(hospitalCard);
+                });
+            }, 500);
+        }
+
+        function createHospitalCard(hospital) {
+            const card = document.createElement('div');
+            card.className = 'hospital-card';
+            
+            card.innerHTML = `
+                <img src="${hospital.image}" alt="${hospital.name}" class="hospital-image">
+                <div class="hospital-info">
+                    <h2 class="hospital-name">${hospital.name}</h2>
+                    <div class="rating">${'★'.repeat(hospital.rating)}</div>
+                    <div class="specialties">
+                        ${hospital.specialties.map(specialty => 
+                            `<span class="specialty-tag">${specialty}</span>`
+                        ).join('')}
+                    </div>
+                    <p>${hospital.description}</p>
+                    <div class="contact-info">
+                        <p>📍 ${hospital.location}</p>
+                        <p>📞 ${hospital.phone}</p>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Load Mumbai hospitals by default
+        window.onload = () => changeCity();
+    </script>
+</body>
+</html>
